@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"strings"
+
+	flag "github.com/spf13/pflag"
 
 	"github.com/aliskhannn/gosort/internal/sorter"
 )
@@ -15,14 +16,14 @@ import (
 func main() {
 	// Определение флагов командной строки
 	var (
-		flagCol    = flag.Int("k", 0, "Номер колонки (1..N) для сортировки; по умолчанию вся строка. Разделитель — табуляция.")
-		flagNum    = flag.Bool("n", false, "Числовая сортировка (по числовому значению).")
-		flagRev    = flag.Bool("r", false, "Обратный порядок (reverse).")
-		flagUniq   = flag.Bool("u", false, "Выводить только уникальные строки (после сортировки)")
-		flagMonth  = flag.Bool("M", false, "Сортировка по месяцу (Jan..Dec)")
-		flagTrimTB = flag.Bool("b", false, "Игнорировать хвостовые пробелы при сравнении")
-		flagCheck  = flag.Bool("c", false, "Проверить, отсортированы ли данные (ничего не сортировать)")
-		flagHuman  = flag.Bool("h", false, "Числовая сортировка с суффиксами (K, M, G, T, P, E)")
+		flagCol    = flag.IntP("k", "k", 0, "Номер колонки (1..N) для сортировки; по умолчанию вся строка. Разделитель — табуляция.")
+		flagNum    = flag.BoolP("numeric", "n", false, "Числовая сортировка (по числовому значению).")
+		flagRev    = flag.BoolP("reverse", "r", false, "Обратный порядок (reverse).")
+		flagUniq   = flag.BoolP("unique", "u", false, "Выводить только уникальные строки (после сортировки)")
+		flagMonth  = flag.BoolP("month-sort", "M", false, "Сортировка по месяцу (Jan..Dec)")
+		flagTrimTB = flag.BoolP("ignore-tb", "b", false, "Игнорировать хвостовые пробелы при сравнении")
+		flagCheck  = flag.BoolP("check", "c", false, "Проверить, отсортированы ли данные (ничего не сортировать)")
+		flagHuman  = flag.BoolP("human-numeric", "h", false, "Числовая сортировка с суффиксами (K, M, G, T, P, E)")
 	)
 
 	// Кастомное отображение справки по флагам
