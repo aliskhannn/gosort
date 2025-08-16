@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// Определение флагов командной строки
+	// Define command-line flags.
 	var (
 		flagCol    = flag.IntP("k", "k", 0, "Номер колонки (1..N) для сортировки; по умолчанию вся строка. Разделитель — табуляция.")
 		flagNum    = flag.BoolP("numeric", "n", false, "Числовая сортировка (по числовому значению).")
@@ -26,7 +26,7 @@ func main() {
 		flagHuman  = flag.BoolP("human-numeric", "h", false, "Числовая сортировка с суффиксами (K, M, G, T, P, E)")
 	)
 
-	// Кастомное отображение справки по флагам
+	// Custom usage/help message.
 	flag.Usage = func() {
 		fmt.Fprint(os.Stderr, "gosort — упрощённый sort\n")
 		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] [FILE ...]\n\n", os.Args[0])
@@ -36,7 +36,7 @@ func main() {
 
 	flag.Parse()
 
-	// Валидация несовместимых флагов
+	// Validate incompatible flags.
 	if *flagNum && *flagHuman {
 		fmt.Fprintln(os.Stderr, "Предупреждение: указаны -n и -h одновременно; используется -h (человекочитаемые числа).")
 	}
@@ -44,7 +44,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Предупреждение: -M несовместим с -n/-h; используется -M.")
 	}
 
-	// Чтение входных данных из файлов или STDIN
+	// Read input from files or STDIN.
 	inputs := flag.Args()
 	lines, err := readAll(inputs)
 	if err != nil {
@@ -52,7 +52,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Конфигурация сортировки
+	// Configure sort options.
 	cfg := sorter.Config{
 		Column:        *flagCol,
 		Reverse:       *flagRev,
@@ -64,7 +64,7 @@ func main() {
 		Delimiter:     "\t",
 	}
 
-	// Режим проверки сортировки (-c)
+	// Check mode (-c).
 	if *flagCheck {
 		var ok bool
 		var i int
@@ -78,14 +78,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Выполнение сортировки
+	// Perform sorting.
 	out, err := sorter.Sort(lines, cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Ошибка сортировки:", err)
 		os.Exit(1)
 	}
 
-	// Вывод результата на STDOUT с переносами строк
+	// Print result to STDOUT with line breaks.
 	w := bufio.NewWriter(os.Stdout)
 	for i, s := range out {
 		if i > 0 {
@@ -98,9 +98,9 @@ func main() {
 	_ = w.Flush()
 }
 
-// readAll читает строки из списка файлов.
-// Если files пуст, читает из STDIN.
-// Поддерживается специальное имя "-" для STDIN.
+// readAll reads lines from a list of files.
+// If files are empty, reads from STDIN.
+// Special name "-" is supported for STDIN.
 func readAll(files []string) ([]string, error) {
 	if len(files) == 0 {
 		return readFrom(os.Stdin)
@@ -135,11 +135,11 @@ func readAll(files []string) ([]string, error) {
 	return all, nil
 }
 
-// readFrom читает все строки из io.Reader и возвращает срез строк.
-// Игнорируются символы возврата каретки (\r).
-// Если вход пуст, возвращается ошибка "no input".
+// readFrom reads all lines from io.Reader and returns a slice of strings.
+// Carriage returns (\r) are stripped.
+// If the input is empty, returns "no input" error.
 func readFrom(r io.Reader) ([]string, error) {
-	// Scanner с увеличенным буфером, чтобы работать с длинными строками.
+	// Scanner with an increased buffer size to handle very long lines.
 	s := bufio.NewScanner(r)
 
 	const maxCap = 10 * 1024 * 1024 // 10MB на строку

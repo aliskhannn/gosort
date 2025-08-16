@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-// Config содержит настройки сортировки.
-// Column: номер колонки (1..N). 0 — сортировать по всей строке.
-// Delimiter: разделитель колонок (по умолчанию табуляция).
-// Numeric: сравнивать как числа; HumanNumeric: числа с суффиксами (K/M/...).
-// Month: сравнивать как месяцы (Jan..Dec). Reverse: обратный порядок.
-// Unique: убрать дубликаты после сортировки. IgnoreTrailWS: игнорировать хвостовые пробелы.
-// Приоритет ключей: Month > HumanNumeric > Numeric > строковый.
-// Если указаны несовместимые флаги, приоритет реализуется в KeyFrom.
+// Config defines sorting options.
+// Column: column index (1..N). 0 means sort by the whole line.
+// Delimiter: column separator (default tab).
+// Numeric: compare as numbers; HumanNumeric: numbers with suffixes (K/M/...).
+// Month: compare as months (Jan..Dec). Reverse: reverse order.
+// Unique: remove duplicates after sorting. IgnoreTrailWS: trim trailing spaces.
+// Key priority: Month > HumanNumeric > Numeric > Text.
+// If conflicting flags are set, priority is resolved in KeyFrom.
 type Config struct {
 	Column        int
 	Delimiter     string
@@ -24,10 +24,10 @@ type Config struct {
 	IgnoreTrailWS bool
 }
 
-// Sort сортирует копию входных строк согласно конфигурации.
+// Sort returns a sorted copy of lines according to cfg.
 func Sort(lines []string, cfg Config) ([]string, error) {
 	if len(lines) == 0 {
-		return []string{}, nil // Пустой вход
+		return []string{}, nil // empty entrance
 	}
 
 	ks := buildKeyspace(lines, cfg)
@@ -46,7 +46,7 @@ func Sort(lines []string, cfg Config) ([]string, error) {
 		}
 
 		if cmp == 0 {
-			// Для стабильности — вторичный ключ по исходному индексу
+			// For stability — secondary key on the original index.
 			return li < lj
 		}
 
@@ -60,7 +60,7 @@ func Sort(lines []string, cfg Config) ([]string, error) {
 		k := ks[id]
 		line := lines[id]
 
-		// Обрезаем хвостовые пробелы для -b
+		// Trim trailing spaces for -b.
 		if cfg.IgnoreTrailWS {
 			line = strings.TrimRight(line, " \t")
 		}
@@ -79,8 +79,8 @@ func Sort(lines []string, cfg Config) ([]string, error) {
 	return out, nil
 }
 
-// IsSorted проверяет, отсортирован ли срез согласно cfg.
-// Возвращает ok, индекс(1-based) первой ошибки, левое и правое значения (для сообщения).
+// IsSorted checks if lines are sorted according to cfg.
+// Returns ok, index (1-based) of the first error, and the left/right values for reporting.
 func IsSorted(lines []string, cfg Config) (bool, int, string, string) {
 	if len(lines) <= 1 {
 		return true, 0, "", ""

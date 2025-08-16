@@ -1,43 +1,43 @@
 # gosort
 
-`gosort` — упрощённый аналог UNIX-утилиты `sort`.  
-Программа сортирует строки из файлов или стандартного ввода и выводит их отсортированными на стандартный вывод.
+`gosort` — a simplified analogue of the UNIX utility `sort`.
+The program sorts lines from files or standard input and outputs them sorted to standard output.
 
 ---
 
-## Возможности
+## Features
 
-Поддерживаются флаги, аналогичные GNU `sort`:
+Supported flags, similar to GNU `sort`:
 
-| Флаг       | Описание                                                                                  |
-|------------|-------------------------------------------------------------------------------------------|
-| `-k N`     | Сортировать по колонке N (1..N), разделитель — табуляция по умолчанию                     |
-| `-n`       | Числовая сортировка                                                                        |
-| `-r`       | Обратный порядок (reverse)                                                                 |
-| `-u`       | Выводить только уникальные строки                                                         |
-| `-M`       | Сортировать по названию месяца (Jan, Feb … Dec)                                           |
-| `-b`       | Игнорировать хвостовые пробелы при сравнении                                              |
-| `-c`       | Проверить, отсортированы ли данные; если нет — вывести сообщение об ошибке               |
-| `-h`       | Числовая сортировка с учётом человекочитаемых суффиксов (K, M, G, T, P, E)               |
+| Flag   | Description                                                        |
+| ------ | ------------------------------------------------------------------ |
+| `-k N` | Sort by column N (1..N), delimiter — tab by default                |
+| `-n`   | Numeric sort                                                       |
+| `-r`   | Reverse order                                                      |
+| `-u`   | Output only unique lines                                           |
+| `-M`   | Sort by month name (Jan, Feb … Dec)                                |
+| `-b`   | Ignore trailing whitespace when comparing                          |
+| `-c`   | Check whether the input is sorted; if not — print an error message |
+| `-h`   | Numeric sort with human-readable suffixes (K, M, G, T, P, E)       |
 
-Флаги можно комбинировать, например: `-nr` — числовая сортировка в обратном порядке.  
+Flags can be combined, for example: `-nr` — numeric sort in reverse order.
 
 ---
 
-## Структура проекта
+## Project structure
 
 ```
 .
 ├── cmd                     
 │   └── gosort              
-│       └── main.go         # Главный файл программы (обработка флагов, запуск сортировки)
+│       └── main.go         # Main program file (flag parsing, sorting entry point)
 ├── internal                
-│   └── sorter              # Логика сортировки и вспомогательные функции
-│       ├── sorter.go       # Основная реализация сортировки
-│       ├── key.go          # Логика сортировки по колонкам (-k)
-│       ├── month.go        # Поддержка сортировки по месяцам (-M)
-│       └── hsize.go        # Поддержка сортировки по "человеческим" размерам (-h)
-├── testdata                # Тестовые данные (файлы для интеграционных тестов)
+│   └── sorter              # Sorting logic and helper functions
+│       ├── sorter.go       # Core sorting implementation
+│       ├── key.go          # Column sorting logic (-k)
+│       ├── month.go        # Support for month sorting (-M)
+│       └── hsize.go        # Support for human-readable size sorting (-h)
+├── testdata                # Test data (files for integration tests)
 ├── go.mod                  
 ├── go.sum                  
 ├── Makefile                
@@ -46,106 +46,105 @@
 
 ---
 
-
-## Установка
+## Installation
 
 ```bash
 git clone https://github.com/aliskhannn/gosort.git
 cd gosort
 ```
 
-## Cборка
+## Build
 
 ```bash
 make build
-````
+```
 
-Исполняемый файл появится в директории `bin/`:
+The executable will appear in the `bin/` directory:
 
 ```text
 bin/gosort
 ```
 
-## Запуск
+## Run
 
 ```bash
 ./bin/gosort [OPTIONS] [FILE ...]
 ```
 
-Если файл не указан, читается STDIN.
+If no file is specified, STDIN is used.
 
 ---
 
-## Примеры использования
+## Usage examples
 
-Сортировка обычных строк:
+Sort plain strings:
 
 ```bash
 echo -e "orange\napple\nbanana" | ./bin/gosort
-# Вывод:
+# Output:
 # apple
 # banana
 # orange
 ```
 
-Сортировка по второй колонке (разделитель — табуляция):
+Sort by the second column (tab-delimited):
 
 ```bash
 echo -e "2\tapple\n1\tbanana\n3\tcherry" | ./bin/gosort -k 2
-# Вывод:
+# Output:
 # 2	apple
 # 1	banana
 # 3	cherry
 ```
 
-Числовая сортировка:
+Numeric sort:
 
 ```bash
 echo -e "10\n2\n30" | ./bin/gosort -n
-# Вывод:
+# Output:
 # 2
 # 10
 # 30
 ```
 
-Удаление дубликатов с игнорированием хвостовых пробелов:
+Remove duplicates while ignoring trailing spaces:
 
 ```bash
 echo -e "apple  \napple\nbanana" | ./bin/gosort -b -u
-# Вывод:
+# Output:
 # apple
 # banana
 ```
 
-Сортировка месяцев:
+Sort months:
 
 ```bash
 echo -e "Mar\nJan\nFeb" | ./bin/gosort -M
-# Вывод:
+# Output:
 # Jan
 # Feb
 # Mar
 ```
 
-Проверка сортировки (`-c`):
+Check sorting (`-c`):
 
 ```bash
 echo -e "a\nc\nb" | ./bin/gosort -c
-# Вывод в stderr:
+# Output to stderr:
 # sort: disorder at line 3: "c" > "b"
 ```
 
 ---
 
-## Тестирование и линтинг
+## Testing & Linting
 
-Запуск тестов:
+Run tests:
 
 ```bash
 make test
 ```
 
-Запуск проверки кода:
+Run linting:
 
 ```bash
 make lint
@@ -153,17 +152,17 @@ make lint
 
 ---
 
-## Очистка артефактов сборки
+## Cleaning build artifacts
 
 ```bash
 make clean
 ```
 
-Удаляет бинарные файлы и временные директории.
+Removes binaries and temporary directories.
 
 ---
 
-## Замечания
+## Notes
 
-* `gosort` обрабатывает большие файлы эффективно, не загружая их полностью в память для сортировки ключей.
-* Если указаны конфликтующие флаги (`-n` и `-h`, или `-M` с `-n/-h`), выводится предупреждение, и приоритет отдается одному из режимов.
+* `gosort` handles large files efficiently, without fully loading them into memory for key sorting.
+* If conflicting flags are specified (`-n` and `-h`, or `-M` with `-n/-h`), a warning is shown, and one mode takes priority.

@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
-// parseHumanSize парсит значения вида 10K, 2M, 3G, 4T, 5P, 6E (в двоичных степенях 1024).
-// Допускается суффикс 'B' (например, 10KB). Регистр суффикса не важен. Пробелы вокруг числа игнорируются.
-// Возвращает (значение, true) при успехе; иначе (NaN, false).
+// parseHumanSize parses values like 10K, 2M, 3G, 4T, 5P, 6E (in binary powers of 1024).
+// A 'B' suffix is allowed (e.g., 10KB). Suffix case does not matter. Spaces are ignored.
+// Returns (value, true) on success; otherwise (NaN, false).
 func parseHumanSize(s string) (float64, bool) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return math.NaN(), false
 	}
 
-	// Отделяем конечные буквы (до 2-х: например, KB)
+	// Separate the final letters (up to 2: for example, KB).
 	base := s
 	suf := ""
 
@@ -30,7 +30,7 @@ func parseHumanSize(s string) (float64, bool) {
 	}
 
 	if base == s {
-		// Нет букв — суффикс пустой
+		// No letters — suffix is empty.
 		suf = ""
 	}
 
@@ -56,7 +56,7 @@ func parseHumanSize(s string) (float64, bool) {
 
 	mul, ok := multipliers[suf]
 	if !ok {
-		return math.NaN(), false // Неизвестный суффикс
+		return math.NaN(), false // unknown suffix
 	}
 
 	return val * mul, true

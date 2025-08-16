@@ -7,7 +7,7 @@ var months = map[string]int{
 	"jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
 }
 
-// parseMonth распознаёт трёхбуквенное имя месяца (регистронезависимо).
+// parseMonth recognizes a three-letter month abbreviation (case-insensitive).
 func parseMonth(s string) int {
 	s = strings.ToLower(s)
 	if len(s) < 3 {

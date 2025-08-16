@@ -6,20 +6,20 @@ import (
 	"strings"
 )
 
-// key представляет предобработанное представление строки для сравнения.
-// Поля взаимно исключают доминирующие режимы сравнения (month, human, num),
-// но строковый ключ присутствует всегда для fallback и вторичных сравнений.
+// key represents a preprocessed form of a string for comparison.
+// Fields are mutually exclusive for dominant comparison modes (month, human, num),
+// but the text field is always present as a fallback and for secondary comparisons.
 type key struct {
-	month int     // 1..12, 0 если не распознано/не используется
-	human float64 // значение для -h, NaN если не используется/ошибка
-	num   float64 // значение для -n, NaN если не используется/ошибка
-	text  string  // строковый ключ (возможна обрезка хвостовых пробелов)
+	month int     // 1..12, 0 if not recognized/not used
+	human float64 // value for -h, NaN if not used/error
+	num   float64 // value for -n, NaN if not used/error
+	text  string  // string key (trailing spaces may be trimmed)
 }
 
-// buildKeyspace создает срез ключей для сортировки на основе строк lines и конфигурации cfg.
-// Для каждой строки формируется ключ key с заполнением полей month, human, num и text
-// в зависимости от включенных режимов сортировки. Колонки выбираются через cfg.Column и cfg.Delimiter.
-// Если cfg.IgnoreTrailWS=true, хвостовые пробелы и табуляции удаляются.
+// buildKeyspace builds a slice of keys for sorting based on lines and cfg.
+// For each line, a key is constructed filling month, human, num, and text
+// depending on enabled modes. Columns are extracted via cfg.Column and cfg.Delimiter.
+// If cfg.IgnoreTrailWS=true, trailing spaces and tabs are trimmed.
 func buildKeyspace(lines []string, cfg Config) []key {
 	ks := make([]key, len(lines))
 
@@ -58,20 +58,21 @@ func buildKeyspace(lines []string, cfg Config) []key {
 	return ks
 }
 
-// compareKeys сравнивает два ключа a и b и возвращает:
-// -1, если a < b
+// compareKeys compares two keys a and b and returns:
+// -1 if a < b
 //
-//	1, если a > b
-//	0, если a == b
+//	1 if a > b
+//	0 if a == b
 //
-// Приоритет сравнения: month > human > num > text. Неопределенные/NaN значения отправляются в конец.
+// Priority order: month > human > num > text.
+// Undefined/NaN values are placed at the end.
 func compareKeys(a, b key) int {
-	// Приоритет: month > human > num > text
+	// Priority: month > human > num > text.
 	if a.month != 0 || b.month != 0 {
 		am := a.month
 		bm := b.month
 		if am == 0 && bm != 0 {
-			return 1 // нераспознанные в конец
+			return 1 // unrecognized to the end
 		}
 		if am != 0 && bm == 0 {
 			return -1
@@ -124,13 +125,13 @@ func compareKeys(a, b key) int {
 	return 0
 }
 
-// column извлекает указанную колонку col из строки s, используя разделитель delim.
-// Колонки нумеруются с 1. Если колонка не найдена, возвращается пустая строка.
-// Для col<=1 возвращается либо вся строка, либо первая колонка до разделителя.
+// column extracts the col-th column from string s, using delim as separator.
+// Columns are numbered starting from 1. If not found, returns "".
+// For col<=1 it returns either the whole line or the first column up to the delimiter.
 func column(s string, col int, delim string) string {
 	if col <= 1 {
 		if col == 1 {
-			// первая колонка
+			// First column.
 			if i := strings.Index(s, delim); i >= 0 {
 				return s[:i]
 			}
@@ -139,7 +140,7 @@ func column(s string, col int, delim string) string {
 		return s
 	}
 
-	// Быстрый проход без alloc: считаем разделители
+	// Quick pass without alloc: counting separators.
 	start := 0
 	seen := 1
 
@@ -162,17 +163,17 @@ func column(s string, col int, delim string) string {
 	}
 }
 
-// parseNumber пытается интерпретировать строку s как число с плавающей точкой.
-// Игнорируются пробелы вокруг числа. Если парсинг не удался или строка пустая, возвращается NaN и false.
-// Иначе возвращается число и true.
+// parseNumber tries to parse s as a floating-point number.
+// Leading/trailing spaces are ignored. On failure or empty string, returns NaN and false.
+// Otherwise returns the number and true.
 func parseNumber(s string) (float64, bool) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return math.NaN(), false
 	}
 
-	// Используем ParseFloat для универсальности
-	// (десятичная точка, экспоненты поддерживаются).
+	// Use ParseFloat for versatility
+	// (decimal point, exponents supported).
 	v, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return 0, false
