@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package main_test
+package integration_test
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ const binName = "gosort"
 func buildBinary(t *testing.T) string {
 	t.Helper()
 	binPath := filepath.Join(t.TempDir(), binName)
-	cmd := exec.Command("go", "build", "-o", binPath, "./cmd/gosort")
+	cmd := exec.Command("go", "build", "-o", binPath, "github.com/aliskhannn/gosort/cmd/gosort")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("failed to build binary: %v\n%s", err, string(out))
 	}
@@ -38,8 +38,8 @@ func runCmd(t *testing.T, bin string, args ...string) string {
 
 func TestSort_Small(t *testing.T) {
 	bin := buildBinary(t)
-	out := runCmd(t, bin, "testdata/small.txt")
-	expected := strings.TrimRight(readFile(t, "testdata/expected_small.txt"), "\n")
+	out := runCmd(t, bin, "../testdata/small.txt")
+	expected := strings.TrimRight(readFile(t, "../testdata/expected_small.txt"), "\n")
 	if out != expected {
 		t.Errorf("unexpected output:\nGot:\n%s\nWant:\n%s", out, expected)
 	}
@@ -47,7 +47,7 @@ func TestSort_Small(t *testing.T) {
 
 func TestSort_ByColumn(t *testing.T) {
 	bin := buildBinary(t)
-	out := runCmd(t, bin, "-k", "2", "testdata/table.txt")
+	out := runCmd(t, bin, "-k", "2", "../testdata/table.txt")
 	expected := "2\ta\n1\tb\n3\tc"
 	if out != expected {
 		t.Errorf("unexpected output:\nGot:\n%s\nWant:\n%s", out, expected)
@@ -56,7 +56,7 @@ func TestSort_ByColumn(t *testing.T) {
 
 func TestSort_Numeric(t *testing.T) {
 	bin := buildBinary(t)
-	out := runCmd(t, bin, "-n", "testdata/nums.txt")
+	out := runCmd(t, bin, "-n", "../testdata/nums.txt")
 	expected := "1\n2\n10\n20"
 	if out != expected {
 		t.Errorf("unexpected output:\nGot:\n%s\nWant:\n%s", out, expected)
@@ -65,7 +65,7 @@ func TestSort_Numeric(t *testing.T) {
 
 func TestSort_Months(t *testing.T) {
 	bin := buildBinary(t)
-	out := runCmd(t, bin, "-M", "testdata/months.txt")
+	out := runCmd(t, bin, "-M", "../testdata/months.txt")
 	expected := "Jan\nFeb\nMar\nDec"
 	if out != expected {
 		t.Errorf("unexpected output:\nGot:\n%s\nWant:\n%s", out, expected)
@@ -74,7 +74,7 @@ func TestSort_Months(t *testing.T) {
 
 func TestSort_HumanSizes(t *testing.T) {
 	bin := buildBinary(t)
-	out := runCmd(t, bin, "-h", "testdata/humansizes.txt")
+	out := runCmd(t, bin, "-h", "../testdata/humansizes.txt")
 	expected := "512\n1K\n128K\n2M"
 	if out != expected {
 		t.Errorf("unexpected output:\nGot:\n%s\nWant:\n%s", out, expected)
@@ -83,7 +83,7 @@ func TestSort_HumanSizes(t *testing.T) {
 
 func TestSort_Blanks_Unique(t *testing.T) {
 	bin := buildBinary(t)
-	out := runCmd(t, bin, "-u", "-b", "testdata/blanks.txt")
+	out := runCmd(t, bin, "-u", "-b", "../testdata/blanks.txt")
 	expected := "apple\nbanana"
 	if out != expected {
 		t.Errorf("unexpected output:\nGot:\n%s\nWant:\n%s", out, expected)

@@ -16,39 +16,39 @@ import (
 func main() {
 	// Define command-line flags.
 	var (
-		flagCol    = flag.IntP("k", "k", 0, "Номер колонки (1..N) для сортировки; по умолчанию вся строка. Разделитель — табуляция.")
-		flagNum    = flag.BoolP("numeric", "n", false, "Числовая сортировка (по числовому значению).")
-		flagRev    = flag.BoolP("reverse", "r", false, "Обратный порядок (reverse).")
-		flagUniq   = flag.BoolP("unique", "u", false, "Выводить только уникальные строки (после сортировки)")
-		flagMonth  = flag.BoolP("month-sort", "M", false, "Сортировка по месяцу (Jan..Dec)")
-		flagTrimTB = flag.BoolP("ignore-tb", "b", false, "Игнорировать хвостовые пробелы при сравнении")
-		flagCheck  = flag.BoolP("check", "c", false, "Проверить, отсортированы ли данные (ничего не сортировать)")
-		flagHuman  = flag.BoolP("human-numeric", "h", false, "Числовая сортировка с суффиксами (K, M, G, T, P, E)")
+		flagCol    = flag.IntP("k", "k", 0, "Column number (1..N) to sort by; default is the whole line. Delimiter is tab.")
+		flagNum    = flag.BoolP("numeric", "n", false, "Numeric sort (compare by numeric value).")
+		flagRev    = flag.BoolP("reverse", "r", false, "Reverse the sorting order.")
+		flagUniq   = flag.BoolP("unique", "u", false, "Output only unique lines (after sorting).")
+		flagMonth  = flag.BoolP("month-sort", "M", false, "Sort by month name (Jan..Dec).")
+		flagTrimTB = flag.BoolP("ignore-tb", "b", false, "Ignore trailing spaces when comparing.")
+		flagCheck  = flag.BoolP("check", "c", false, "Check whether the input is sorted; do not sort.")
+		flagHuman  = flag.BoolP("human-numeric", "h", false, "Numeric sort with suffixes (K, M, G, T, P, E).")
 	)
 
 	// Custom usage/help message.
 	flag.Usage = func() {
-		fmt.Fprint(os.Stderr, "gosort — упрощённый sort\n")
-		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] [FILE ...]\n\n", os.Args[0])
+		_, _ = fmt.Fprint(os.Stderr, "gosort — simplified sort\n")
+		_, _ = fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] [FILE ...]\n\n", os.Args[0])
 		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "\nЕсли FILE не указан, читается STDIN.")
+		_, _ = fmt.Fprintln(os.Stderr, "\nIf FILE is not specified, input is read from STDIN.")
 	}
 
 	flag.Parse()
 
 	// Validate incompatible flags.
 	if *flagNum && *flagHuman {
-		fmt.Fprintln(os.Stderr, "Предупреждение: указаны -n и -h одновременно; используется -h (человекочитаемые числа).")
+		_, _ = fmt.Fprintln(os.Stderr, "Warning: both -n and -h specified; using -h (human-readable numbers).")
 	}
 	if *flagMonth && (*flagNum || *flagHuman) {
-		fmt.Fprintln(os.Stderr, "Предупреждение: -M несовместим с -n/-h; используется -M.")
+		_, _ = fmt.Fprintln(os.Stderr, "Warning: -M is incompatible with -n/-h; using -M.")
 	}
 
 	// Read input from files or STDIN.
 	inputs := flag.Args()
 	lines, err := readAll(inputs)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Ошибка чтения:", err)
+		_, _ = fmt.Fprintln(os.Stderr, "Read error:", err)
 		os.Exit(1)
 	}
 
@@ -71,17 +71,17 @@ func main() {
 		var a, b string
 
 		if ok, i, a, b = sorter.IsSorted(lines, cfg); ok {
-			// Совместимо с GNU sort: ничего не выводим, код 0
+			// Compatible with GNU sort: produce no output, exit code 0
 			return
 		}
-		fmt.Fprintf(os.Stderr, "sort: disorder at line %d: %q > %q\n", i, a, b)
+		_, _ = fmt.Fprintf(os.Stderr, "sort: disorder at line %d: %q > %q\n", i, a, b)
 		os.Exit(1)
 	}
 
 	// Perform sorting.
 	out, err := sorter.Sort(lines, cfg)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Ошибка сортировки:", err)
+		_, _ = fmt.Fprintln(os.Stderr, "Sort error:", err)
 		os.Exit(1)
 	}
 
@@ -142,7 +142,7 @@ func readFrom(r io.Reader) ([]string, error) {
 	// Scanner with an increased buffer size to handle very long lines.
 	s := bufio.NewScanner(r)
 
-	const maxCap = 10 * 1024 * 1024 // 10MB на строку
+	const maxCap = 10 * 1024 * 1024 // 10MB per line
 	s.Buffer(make([]byte, 64*1024), maxCap)
 
 	var res []string

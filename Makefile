@@ -12,7 +12,7 @@ run: build
 
 test:
 	go test -v ./...
-	go test -v -tags=integration
+	go test -v -tags=integration ./integration
 
 lint:
 	go vet ./...
